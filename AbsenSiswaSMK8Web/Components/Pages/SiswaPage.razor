@@ -1,0 +1,175 @@
+﻿@page "/siswa"
+@using AbsenSiswaSMK8Web.Data
+@rendermode InteractiveServer
+
+<PageTitle>Siswa</PageTitle>
+
+<div style="display: flex; justify-content:space-between; margin-bottom:30px">
+    <h1>Data Siswa</h1>
+    <button style="height: 100px;" data-bs-toggle="modal" data-bs-target="#exampleModal2">Tambah</button>
+</div>
+
+<table class="table">
+    <tr style="margin-left background-color: red;">
+        <th>NIS</th>
+        <th>Nama</th>
+        <th>Tempat Lahir</th>
+        <th>Umur</th>
+        <th style="width: 150px;">Action</th>
+    </tr>
+    @foreach (var data in dataSiswa)
+    {
+        <tr>
+            <td>@data.NIS</td>
+            <td>@data.Nama</td>
+            <td>@data.TempatLahir</td>
+            <td>@(DateTime.Now.Year - data.TanggalLahir.Year)</td>
+            <td>
+                <button class="btn btn-warning" @onclick="(()=>Edit(data))" style="color:rgb(151, 124, 5)"
+                    data-bs-toggle="modal" data-bs-target="#exampleModal2">Edit</button>
+                <button class="btn btn-danger" style="color:red" @onclick="(()=>Delete(data))">Delete</button>
+            </td>
+        </tr>
+    }
+</table>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p2">
+                <div class="mb-3 row">
+                    <label class="col-sm-4 col-form-label">NIS</label>
+                    <div class="col-sm-8">
+                        <input @bind-value="model.NIS" class="form-control">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-4 col-form-label">Nama</label>
+                    <div class="col-sm-8">
+                        <input @bind-value="model.Nama" class="form-control">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-4 col-form-label">Tempat Lahir</label>
+                    <div class="col-sm-8">
+                        <input class="form-control" @bind-value="model.TempatLahir">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-4 col-form-label">Tanggal Lahir</label>
+                    <div class="col-sm-8">
+                        <input type="date" class="form-control" @bind-value="model.TanggalLahir">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" @onclick="Simpan">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    table {
+        width: 100%;
+    }
+
+    table,
+    th,
+    td {
+        border: 1px solid black;
+        padding: 5px;
+    }
+</style>
+
+
+@inject ApplicationDbContext dbContext;
+
+@code {
+    private int currentCount = 0;
+    List<Siswa> dataSiswa = new List<Siswa>();
+    Siswa model = new Siswa();
+    protected override Task OnInitializedAsync()
+    {
+        dataSiswa = dbContext.DataSiswa.ToList();
+        return Task.CompletedTask;
+    }
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+    public void Simpan()
+    {
+        try
+        {
+
+            if (model.Id <= 0)
+            {
+                ///insert
+                var result = dbContext.DataSiswa.Add(model);
+                dbContext.SaveChanges();
+                dataSiswa.Add(model);
+
+            }
+            else
+            {
+                //update
+
+                var dataOnDatabase = dbContext.DataSiswa.SingleOrDefault(x => x.Id == model.Id);
+                if (dataOnDatabase == null)
+                {
+                    Console.WriteLine("Data Tidak ditemukan ");
+                }
+                else
+                {
+                    dataOnDatabase.NIS = model.NIS;
+                    dataOnDatabase.Nama = model.Nama;
+                    dataOnDatabase.TempatLahir = model.TempatLahir;
+                    dataOnDatabase.TanggalLahir = model.TanggalLahir;
+                    dbContext.SaveChanges();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+
+    public void Edit(Siswa siswa)
+    {
+        model = siswa;
+    }
+
+
+    public void Delete(Siswa siswa)
+    {
+        try
+        {
+            var dataOnDatabase = dbContext.DataSiswa.FirstOrDefault(x => x.Id == siswa.Id);
+            if (dataOnDatabase == null)
+            {
+                Console.WriteLine("Data Tidak ditemukan ");
+            }
+            else { 
+                dbContext.DataSiswa.Remove(dataOnDatabase);
+                dbContext.SaveChanges();
+                dataSiswa.Remove(dataOnDatabase);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
