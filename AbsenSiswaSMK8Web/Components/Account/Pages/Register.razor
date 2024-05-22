@@ -17,7 +17,7 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
+<h1>Register Baru</h1>
 
 <div class="row">
     <div class="col-md-4">
@@ -45,14 +45,13 @@
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </EditForm>
     </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div>
 </div>
+<style>
+    .row{
+        background-color: red;
+        height: 100vh;
+    }
+</style>
 
 @code {
     private IEnumerable<IdentityError>? identityErrors;
